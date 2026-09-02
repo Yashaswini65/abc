@@ -11,49 +11,30 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: "pages"
   cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    # THIS IS WHAT CREATES THE WEBSITE URL IN GITHUB
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Configure GitHub Pages
+      - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload website
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload website files
+        uses: actions/upload-pages-artifact@v4
         with:
           path: .
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy website
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Get Website URL
-        run: |
-          REPO="${GITHUB_REPOSITORY#*/}"
-          USER="${GITHUB_REPOSITORY_OWNER}"
-
-          if [ "$REPO" = "$USER.github.io" ]; then
-            URL="https://$USER.github.io/"
-          else
-            URL="https://$USER.github.io/$REPO/"
-          fi
-
-          echo "=========================================="
-          echo "🚀 WEBSITE DEPLOYED SUCCESSFULLY"
-          echo "🌐 URL: $URL"
-          echo "=========================================="
-
-          echo "## 🚀 Website Deployed Successfully" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "### 🌐 Live Website" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "[👉 Open Website]($URL)" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "**URL:** $URL" >> "$GITHUB_STEP_SUMMARY"
