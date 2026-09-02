@@ -1,50 +1,59 @@
 name: Deploy HTML Website
 
-# Trigger deployment whenever code is pushed to main
 on:
   push:
+    branches:
+      - main
 
-
-# Required permissions for GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Prevent multiple deployments from running at the same time
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
   deploy:
-    name: Deploy Website
     runs-on: ubuntu-latest
 
     steps:
-      # Get your latest pushed code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Configure GitHub Pages
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      # Package your HTML website
       - name: Upload website
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
 
-      # Deploy the website
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
 
-      # Display the deployed URL
-      - name: Show Website URL
+      - name: Get Website URL
         run: |
-          echo "===================================="
-          echo "Website deployed successfully!"
-          echo "URL: ${{ steps.deployment.outputs.page_url }}"
-          echo "===================================="
+          REPO="${GITHUB_REPOSITORY#*/}"
+          USER="${GITHUB_REPOSITORY_OWNER}"
+
+          if [ "$REPO" = "$USER.github.io" ]; then
+            URL="https://$USER.github.io/"
+          else
+            URL="https://$USER.github.io/$REPO/"
+          fi
+
+          echo "=========================================="
+          echo "🚀 WEBSITE DEPLOYED SUCCESSFULLY"
+          echo "🌐 URL: $URL"
+          echo "=========================================="
+
+          echo "## 🚀 Website Deployed Successfully" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### 🌐 Live Website" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "[👉 Open Website]($URL)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**URL:** $URL" >> "$GITHUB_STEP_SUMMARY"
