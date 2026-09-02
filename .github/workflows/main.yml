@@ -1,50 +1,39 @@
 name: Deploy HTML Website
 
-# Trigger deployment whenever code is pushed to main
 on:
   push:
+   
 
-
-# Required permissions for GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Prevent multiple deployments from running at the same time
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
   deploy:
-    name: Deploy Website
     runs-on: ubuntu-latest
 
-    steps:
-      # Get your latest pushed code
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    # THIS IS WHAT CREATES THE WEBSITE URL IN GITHUB
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
-      # Configure GitHub Pages
-      - name: Configure GitHub Pages
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
 
-      # Package your HTML website
-      - name: Upload website
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload website files
+        uses: actions/upload-pages-artifact@v4
         with:
           path: .
 
-      # Deploy the website
-      - name: Deploy to GitHub Pages
+      - name: Deploy website
         id: deployment
         uses: actions/deploy-pages@v4
-
-      # Display the deployed URL
-      - name: Show Website URL
-        run: |
-          echo "===================================="
-          echo "Website deployed successfully!"
-          echo "URL: ${{ steps.deployment.outputs.page_url }}"
-          echo "===================================="
